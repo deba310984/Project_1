@@ -3,7 +3,7 @@
 - **Portfolio No.:** 1
 - **Original Reference No.:** #11
 - **Reference:** https://github.com/NotHarshhaa/DevOps-Projects/tree/master/DevOps-Project-11
-- **Overall status:** Code complete & format-validated; AWS apply/test pending (owner)
+- **Overall status:** Verified in AWS (38 resources applied, ALB serving, screenshot captured). Destroy owner-confirmed pending.
 
 ## Status legend
 Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verified Locally · Verified in AWS · Published to GitHub · Completed
@@ -24,7 +24,7 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 | 3 | Application tier (launch template, ASG, ALB, SSM role) | Implemented — Not Yet Verified · Published |
 | 4 | Data tier (RDS + subnet group) | Implemented — Not Yet Verified · Published |
 | 5 | Outputs, helper scripts, terraform test | Implemented — Not Yet Verified · Published |
-| 6 | (Owner/AWS) apply, test, screenshot, destroy | Planned (owner action) |
+| 6 | (Owner/AWS) apply, test, screenshot, destroy | Verified in AWS — applied (38 res), tested via ALB, screenshot saved; destroy pending owner confirmation |
 | 7 | Docs polish, interview sheet | Verified Locally · Published |
 
 ## Test results

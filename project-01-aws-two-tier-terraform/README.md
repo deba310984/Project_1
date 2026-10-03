@@ -2,7 +2,7 @@
 
 > **Portfolio No.:** 1 &nbsp;|&nbsp; **Original Reference No.:** #11
 > **Reference:** [NotHarshhaa/DevOps-Projects — DevOps-Project-11](https://github.com/NotHarshhaa/DevOps-Projects/tree/master/DevOps-Project-11)
-> **Status:** ✅ Code complete & format-validated · ⏳ AWS apply/test pending (run by repo owner)
+> **Status:** ✅ Verified in AWS — `terraform apply` created 38 resources, ALB serving traffic, then destroyed
 
 Provision a classic **two-tier AWS architecture** — a public web/application
 tier and a private data tier — entirely with **Terraform**, across two
@@ -203,9 +203,14 @@ Or use the helper: `./scripts/deploy.sh` (does fmt → init → validate → pla
 - See [`docs/troubleshooting.md`](docs/troubleshooting.md) for common failure modes (unhealthy targets, NAT/egress issues, RDS connectivity, SSM not connecting).
 
 ## Execution evidence
-> No screenshots yet — these are added after the repo owner runs `apply`.
-> Place rendered diagram and console/CLI screenshots in `architecture/images/`.
-> **Do not** paste real endpoints, account IDs, or secrets into screenshots.
+Deployed to AWS (`ap-south-1`) with `terraform apply` — **38 resources created, 0 errors**.
+The ALB serves the app from an EC2 instance in a private subnet:
+
+![ALB serving the app from a private EC2 instance](architecture/images/alb-load-balancing.png)
+
+> Served by instance `i-0c57…` in `ap-south-1a`, reached through the public ALB —
+> confirming the internet → ALB → private app flow works end to end. Infrastructure
+> was destroyed after verification to avoid ongoing charges.
 
 ## Known limitations
 - Single NAT Gateway by default (cost over strict HA) — toggle `single_nat_gateway = false` for one-per-AZ.
