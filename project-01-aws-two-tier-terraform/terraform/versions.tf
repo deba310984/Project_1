@@ -9,7 +9,7 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
       # ~> 5.0 means ">= 5.0.0 and < 6.0.0": pick up patch/minor fixes,
       # but never a major (6.x) that could introduce breaking changes.
       version = "~> 5.0"

@@ -18,8 +18,8 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 ## Phases
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 0 | Scaffold & Terraform foundation (versions, providers, vars, .gitignore, docs, diagram) | In Progress |
-| 1 | Networking (VPC, subnets, IGW, NAT, routes) | Planned |
+| 0 | Scaffold & Terraform foundation (versions, providers, vars, .gitignore, docs, diagram) | Verified Locally (fmt) |
+| 1 | Networking (VPC, subnets, IGW, NAT, routes) | Implemented — Not Yet Verified |
 | 2 | Security groups (ALB → App → DB) | Planned |
 | 3 | Application tier (launch template, ASG, ALB, SSM role) | Planned |
 | 4 | Data tier (RDS + subnet group) | Planned |
@@ -28,9 +28,9 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 | 7 | Docs polish, interview sheet, commit & PR | Planned |
 
 ## Test results
-- `terraform fmt -check`: not yet run
-- `terraform validate`: not yet run
-- `terraform plan`: not yet run
+- `terraform fmt -check`: PASS (run in cloud container, 2026-10-03)
+- `terraform validate`: BLOCKED in container (egress proxy blocks registry.terraform.io; provider cannot download). Run on user's machine.
+- `terraform plan`: not yet run (user's machine, needs AWS creds)
 
 ## Security checks
 - No secrets/state committed: enforced via `.gitignore` (verify before each commit)
