@@ -2,7 +2,7 @@
 
 # ☁️ Two-Tier AWS Infrastructure as Code — Terraform
 
-### Production-shaped, highly-available AWS architecture provisioned entirely with Terraform
+### Highly-available, production-shaped AWS architecture provisioned entirely with Terraform
 
 [![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/)
@@ -16,18 +16,18 @@
 
 ---
 
-## 🎯 What this project demonstrates
+## 🎯 Overview
 
-A complete, **two-tier** web architecture — load-balanced application tier + private managed database — built **100% as code**, the way real infrastructure teams ship it:
+A complete **two-tier** web architecture — load-balanced application tier + private managed database — built **100% as code**, the way real infrastructure teams ship it:
 
 - 🏗️ **Infrastructure as Code** with Terraform (modular files, variables, outputs, `terraform test`, version pinning)
 - 🌐 **VPC networking across 2 Availability Zones** — public / private-app / private-db subnet tiers
-- ⚖️ **Application Load Balancer + Auto Scaling Group** of EC2 instances (self-healing, multi-AZ)
+- ⚖️ **Application Load Balancer + Auto Scaling Group** of EC2 instances (self-healing, multi-AZ, zero-downtime instance refresh)
 - 🗄️ **Amazon RDS (MySQL)** — private, encrypted at rest, never reachable from the internet
 - 🔒 **Defense-in-depth security** — least-privilege security-group chain (ALB → App → DB), **no SSH** (admin via SSM Session Manager), **IMDSv2 enforced**
 - 💰 **Cost-aware & safe** — single-NAT toggle, secrets kept out of git, full teardown documented
 
-> **Live proof:** applied to AWS (`ap-south-1`), the ALB served traffic from a private EC2 instance, then everything was destroyed to avoid charges. Screenshot below.
+> **Verified live:** applied to AWS (`ap-south-1`), the ALB served traffic from a private EC2 instance across AZs, then everything was destroyed to avoid charges. Screenshot below.
 
 ## 🗺️ Architecture
 
@@ -59,7 +59,7 @@ flowchart TB
 
 ![ALB serving the app from a private EC2 instance across AZs](project-01-aws-two-tier-terraform/architecture/images/alb-load-balancing.png)
 
-*The Application Load Balancer serving the app from an EC2 instance (`i-0c57…`) running in a **private** subnet in `ap-south-1a` — proving the full `Internet → ALB → private app → private DB` flow.*
+*The Application Load Balancer serving the app from an EC2 instance running in a **private** subnet in `ap-south-1b` — proving the full `Internet → ALB → private app → private DB` flow.*
 
 ## 🧰 Tech stack
 
@@ -75,7 +75,7 @@ flowchart TB
 
 ```bash
 git clone https://github.com/deba310984/aws-two-tier-terraform
-cd Project_1/project-01-aws-two-tier-terraform/terraform
+cd aws-two-tier-terraform/project-01-aws-two-tier-terraform/terraform
 
 export TF_VAR_db_password='your-strong-password'   # never committed
 terraform init
@@ -87,23 +87,14 @@ curl "$(terraform output -raw alb_dns_name)"        # smoke test
 terraform destroy       # tear down to stop charges
 ```
 
-## 📂 Project
+## 📂 Documentation
 
-📁 **[`project-01-aws-two-tier-terraform/`](project-01-aws-two-tier-terraform/)** — full project with detailed docs:
+📁 **[`project-01-aws-two-tier-terraform/`](project-01-aws-two-tier-terraform/)**
 
 - 📘 [Full project README](project-01-aws-two-tier-terraform/README.md) — architecture deep-dive, security, cost, cleanup
 - 🛠️ [Implementation notes](project-01-aws-two-tier-terraform/docs/implementation-notes.md) — design decisions & trade-offs
 - 🧯 [Troubleshooting guide](project-01-aws-two-tier-terraform/docs/troubleshooting.md)
-- 🎤 [Interview prep & revision sheet](project-01-aws-two-tier-terraform/docs/interview-prep.md)
 
-## 💡 Skills showcased for recruiters
+## 💡 Skills demonstrated
 
 `AWS` · `Terraform` · `Infrastructure as Code` · `VPC design & subnetting` · `High availability (multi-AZ)` · `Load balancing & auto scaling` · `Cloud security (least privilege, IAM, IMDSv2)` · `Managed databases` · `Cost optimization` · `Git/GitHub workflow`
-
----
-
-<div align="center">
-
-*Part of a hands-on DevOps / SRE portfolio. Reference inspiration: [NotHarshhaa/DevOps-Projects #11](https://github.com/NotHarshhaa/DevOps-Projects) — independent implementation.*
-
-</div>
