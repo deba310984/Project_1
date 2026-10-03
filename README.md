@@ -74,7 +74,7 @@ flowchart TB
 ## 🚀 Quick start
 
 ```bash
-git clone https://github.com/deba310984/Project_1
+git clone https://github.com/deba310984/aws-two-tier-terraform
 cd Project_1/project-01-aws-two-tier-terraform/terraform
 
 export TF_VAR_db_password='your-strong-password'   # never committed
