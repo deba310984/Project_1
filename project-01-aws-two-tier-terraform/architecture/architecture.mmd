@@ -1,0 +1,39 @@
+%% Two-Tier AWS Infrastructure — Project 01 (Reference #11)
+%% Editable Mermaid source. Render with mermaid.live or the mermaid CLI.
+flowchart TB
+    user([Internet User])
+
+    subgraph AWS["AWS Region"]
+        igw[Internet Gateway]
+
+        subgraph VPC["VPC 10.0.0.0/16"]
+            direction TB
+
+            subgraph PUB["Public Subnets (2 AZs)"]
+                alb[Application Load Balancer<br/>HTTP :80]
+                nat[NAT Gateway]
+            end
+
+            subgraph APP["Private App Subnets (2 AZs)"]
+                asg[Auto Scaling Group<br/>EC2 t3.micro x N<br/>web server]
+            end
+
+            subgraph DB["Private DB Subnets (2 AZs)"]
+                rds[(Amazon RDS<br/>MySQL db.t3.micro)]
+            end
+        end
+
+        ssm[SSM Session Manager<br/>no public SSH]
+    end
+
+    user -->|HTTP| igw
+    igw --> alb
+    alb -->|forward| asg
+    asg -->|MySQL :3306| rds
+    asg -.->|outbound updates| nat
+    nat --> igw
+    ssm -.->|secure shell| asg
+
+    %% Security group chain (least privilege)
+    classDef sg fill:#fff3cd,stroke:#d39e00,color:#333;
+    class alb,asg,rds sg;
