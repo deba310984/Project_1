@@ -20,7 +20,7 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 |-------|-------------|--------|
 | 0 | Scaffold & Terraform foundation (versions, providers, vars, .gitignore, docs, diagram) | Verified Locally (fmt) |
 | 1 | Networking (VPC, subnets, IGW, NAT, routes) | Implemented — Not Yet Verified |
-| 2 | Security groups (ALB → App → DB) | Planned |
+| 2 | Security groups (ALB → App → DB) | Implemented — Not Yet Verified |
 | 3 | Application tier (launch template, ASG, ALB, SSM role) | Planned |
 | 4 | Data tier (RDS + subnet group) | Planned |
 | 5 | Outputs, fmt, validate, plan | Planned |
