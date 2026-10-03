@@ -120,3 +120,62 @@ variable "asg_desired_capacity" {
   type        = number
   default     = 2
 }
+
+# ---------------------------------------------------------------------------
+# Data tier / RDS (Phase 4)
+# ---------------------------------------------------------------------------
+
+variable "db_engine_version" {
+  description = "MySQL engine version."
+  type        = string
+  default     = "8.0"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class (db.t3.micro = free-tier eligible)."
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "RDS storage in GiB (20 is within free-tier)."
+  type        = number
+  default     = 20
+}
+
+variable "db_name" {
+  description = "Initial database name to create."
+  type        = string
+  default     = "appdb"
+}
+
+variable "db_username" {
+  description = "Master username for the database."
+  type        = string
+  default     = "admin"
+}
+
+variable "db_password" {
+  description = "Master password. Supply via TF_VAR_db_password env var or a gitignored .tfvars — NEVER commit it."
+  type        = string
+  sensitive   = true
+  # No default on purpose: Terraform will prompt/fail if it is not provided,
+  # which prevents an accidental hardcoded secret.
+
+  validation {
+    condition     = length(var.db_password) >= 8
+    error_message = "db_password must be at least 8 characters."
+  }
+}
+
+variable "db_multi_az" {
+  description = "true = Multi-AZ standby (HA, costs ~2x). false = single-AZ (demo)."
+  type        = bool
+  default     = false
+}
+
+variable "db_backup_retention_days" {
+  description = "Automated backup retention in days (0 disables backups)."
+  type        = number
+  default     = 1
+}

@@ -1,0 +1,29 @@
+# terraform.tfvars.example
+# Copy to terraform.tfvars (which is gitignored) and adjust.
+# NEVER put the real db_password here — pass it instead with:
+#   export TF_VAR_db_password='your-strong-password'
+# or create a terraform.tfvars that is NOT committed.
+
+aws_region   = "ap-south-1"
+project_name = "two-tier-demo"
+environment  = "dev"
+
+# Networking
+vpc_cidr           = "10.0.0.0/16"
+az_count           = 2
+single_nat_gateway = true
+
+# Application tier
+instance_type        = "t3.micro"
+asg_min_size         = 2
+asg_max_size         = 4
+asg_desired_capacity = 2
+
+# Database (do NOT store the real password in a committed file)
+db_engine_version        = "8.0"
+db_instance_class        = "db.t3.micro"
+db_name                  = "appdb"
+db_username              = "admin"
+db_multi_az              = false
+db_backup_retention_days = 1
+# db_password            = "set-via-TF_VAR_db_password-or-an-uncommitted-tfvars"
