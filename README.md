@@ -1,48 +1,43 @@
 <div align="center">
 
-# ☁️ Two-Tier AWS Infrastructure as Code — Terraform
+# Two-Tier AWS Infrastructure with Terraform
 
-### Highly-available, production-shaped AWS architecture provisioned entirely with Terraform
+**A highly-available, multi-AZ AWS architecture — application and data tiers — provisioned entirely as code.**
 
-[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
-[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/)
-[![Amazon EC2](https://img.shields.io/badge/EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white)](https://aws.amazon.com/ec2/)
-[![Amazon RDS](https://img.shields.io/badge/RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white)](https://aws.amazon.com/rds/)
-[![IaC](https://img.shields.io/badge/Infrastructure_as_Code-0F9D58?style=for-the-badge&logo=githubactions&logoColor=white)](#)
-
-**Deployed & verified on AWS** · 38 resources from a single `terraform apply` · Least-privilege networking · SSH-less (SSM) · Encrypted database
+[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat-square&logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![AWS](https://img.shields.io/badge/AWS-232F3E?style=flat-square&logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/)
+[![Amazon EC2](https://img.shields.io/badge/EC2-FF9900?style=flat-square&logo=amazonec2&logoColor=white)](https://aws.amazon.com/ec2/)
+[![Amazon RDS](https://img.shields.io/badge/RDS-527FFF?style=flat-square&logo=amazonrds&logoColor=white)](https://aws.amazon.com/rds/)
+[![Status](https://img.shields.io/badge/status-deployed_%26_verified-2ea44f?style=flat-square)](#results)
 
 </div>
 
 ---
 
-## 🎯 Overview
+## Overview
 
-A complete **two-tier** web architecture — load-balanced application tier + private managed database — built **100% as code**, the way real infrastructure teams ship it:
+This project provisions a production-shaped **two-tier architecture** on AWS using
+**Terraform**. A public load-balanced application tier serves traffic while a private,
+encrypted database tier remains fully isolated from the internet — the baseline pattern
+behind most real-world web applications.
 
-- 🏗️ **Infrastructure as Code** with Terraform (modular files, variables, outputs, `terraform test`, version pinning)
-- 🌐 **VPC networking across 2 Availability Zones** — public / private-app / private-db subnet tiers
-- ⚖️ **Application Load Balancer + Auto Scaling Group** of EC2 instances (self-healing, multi-AZ, zero-downtime instance refresh)
-- 🗄️ **Amazon RDS (MySQL)** — private, encrypted at rest, never reachable from the internet
-- 🔒 **Defense-in-depth security** — least-privilege security-group chain (ALB → App → DB), **no SSH** (admin via SSM Session Manager), **IMDSv2 enforced**
-- 💰 **Cost-aware & safe** — single-NAT toggle, secrets kept out of git, full teardown documented
+The entire stack is defined as code: reviewable, version-controlled, reproducible, and
+destroyable on demand. It was deployed to AWS, verified end to end, and then torn down.
 
-> **Verified live:** applied to AWS (`ap-south-1`), the ALB served traffic from a private EC2 instance across AZs, then everything was destroyed to avoid charges. Screenshot below.
-
-## 🗺️ Architecture
+## Architecture
 
 ```mermaid
 flowchart TB
     user([Internet User])
-    subgraph AWS["AWS Region (2 Availability Zones)"]
+    subgraph AWS["AWS Region · 2 Availability Zones"]
         igw[Internet Gateway]
         subgraph VPC["VPC 10.0.0.0/16"]
             subgraph PUB["Public Subnets"]
-                alb[Application Load Balancer :80]
+                alb[Application Load Balancer]
                 nat[NAT Gateway]
             end
             subgraph APP["Private App Subnets"]
-                asg[Auto Scaling Group · EC2 t3.micro]
+                asg[Auto Scaling Group · EC2]
             end
             subgraph DB["Private DB Subnets"]
                 rds[(RDS MySQL · encrypted)]
@@ -55,23 +50,52 @@ flowchart TB
     ssm -.->|secure shell, no SSH| asg
 ```
 
-## 📸 Live deployment
+**Request flow:** Internet → Internet Gateway → Application Load Balancer (public subnets)
+→ EC2 instances in an Auto Scaling Group (private subnets) → Amazon RDS (private subnets).
+Instances reach the internet outbound-only through a NAT Gateway; administrators connect
+through AWS Systems Manager, so no SSH port is ever exposed. The database is protected by
+two independent layers: it sits in subnets with no internet route, and its security group
+trusts only the application tier.
 
-![ALB serving the app from a private EC2 instance across AZs](project-01-aws-two-tier-terraform/architecture/images/alb-load-balancing.png)
+## Highlights
 
-*The Application Load Balancer serving the app from an EC2 instance running in a **private** subnet in `ap-south-1b` — proving the full `Internet → ALB → private app → private DB` flow.*
+- **Multi-AZ by design** — one VPC spanning two Availability Zones with three subnet tiers (public, private-app, private-db).
+- **Elastic application tier** — an Application Load Balancer in front of an Auto Scaling Group, with zero-downtime rolling instance refresh.
+- **Managed, private database** — Amazon RDS (MySQL), encrypted at rest and never publicly accessible.
+- **Least-privilege networking** — a one-way security-group chain (ALB → App → DB) that trusts tiers by reference, not by IP.
+- **Secure access** — SSH-less administration via SSM Session Manager and enforced IMDSv2.
+- **Safe operations** — secrets and state kept out of version control; `terraform fmt`, `validate`, and a native `terraform test` guardrail.
 
-## 🧰 Tech stack
+## Results
 
-| Category | Technologies |
-|----------|--------------|
-| **IaC** | Terraform (AWS provider ~> 5.0), native `terraform test` |
-| **Compute** | EC2, Launch Templates, Auto Scaling Groups |
-| **Networking** | VPC, Subnets, Internet Gateway, NAT Gateway, Route Tables, Application Load Balancer |
-| **Database** | Amazon RDS (MySQL), DB Subnet Groups |
-| **Security** | IAM roles, Security Groups, SSM Session Manager, IMDSv2 |
+Deployed to AWS (`ap-south-1`): a single `terraform apply` provisioned **38 resources** with
+zero errors. The load balancer served the application from EC2 instances in private subnets
+across both Availability Zones, after which the stack was destroyed to avoid ongoing charges.
 
-## 🚀 Quick start
+![Application served through the ALB from a private EC2 instance](project-01-aws-two-tier-terraform/architecture/images/alb-load-balancing.png)
+
+## Technology Stack
+
+| Area | Technologies |
+|------|--------------|
+| Infrastructure as Code | Terraform (AWS provider `~> 5.0`), `terraform test` |
+| Compute | EC2, Launch Templates, Auto Scaling Groups |
+| Networking | VPC, subnets, Internet Gateway, NAT Gateway, route tables, Application Load Balancer |
+| Database | Amazon RDS (MySQL), DB subnet groups |
+| Security & access | IAM, security groups, SSM Session Manager, IMDSv2 |
+
+## Repository Structure
+
+```text
+project-01-aws-two-tier-terraform/
+├── terraform/        # VPC, security groups, IAM/SSM, ALB + ASG, RDS, outputs
+├── scripts/          # instance bootstrap, deploy, and destroy helpers
+├── tests/            # native terraform test
+├── architecture/     # editable diagram and deployment screenshot
+└── docs/             # implementation notes and troubleshooting guide
+```
+
+## Getting Started
 
 ```bash
 git clone https://github.com/deba310984/aws-two-tier-terraform
@@ -79,22 +103,28 @@ cd aws-two-tier-terraform/project-01-aws-two-tier-terraform/terraform
 
 export TF_VAR_db_password='your-strong-password'   # never committed
 terraform init
-terraform plan          # preview — nothing created
-terraform apply         # creates AWS resources (paid: NAT + ALB)
+terraform plan            # preview — nothing is created
+terraform apply           # provisions AWS resources (NAT Gateway + ALB are billable)
 
 curl "$(terraform output -raw alb_dns_name)"        # smoke test
 
-terraform destroy       # tear down to stop charges
+terraform destroy         # tear down to stop charges
 ```
 
-## 📂 Documentation
+`plan`, `apply`, and `test` require AWS credentials; `fmt` and `validate` run offline once
+the provider is downloaded. See the
+[full project documentation](project-01-aws-two-tier-terraform/README.md) for details,
+and the [implementation notes](project-01-aws-two-tier-terraform/docs/implementation-notes.md)
+for design decisions.
 
-📁 **[`project-01-aws-two-tier-terraform/`](project-01-aws-two-tier-terraform/)**
+## Cost & Cleanup
 
-- 📘 [Full project README](project-01-aws-two-tier-terraform/README.md) — architecture deep-dive, security, cost, cleanup
-- 🛠️ [Implementation notes](project-01-aws-two-tier-terraform/docs/implementation-notes.md) — design decisions & trade-offs
-- 🧯 [Troubleshooting guide](project-01-aws-two-tier-terraform/docs/troubleshooting.md)
+`t3.micro` EC2 and `db.t3.micro` RDS are free-tier eligible; the **NAT Gateway and ALB are
+not** (roughly `$0.045/hr` each plus data). Always run `terraform destroy` when finished and
+confirm no NAT Gateway, ALB, EC2, or RDS resources remain.
 
-## 💡 Skills demonstrated
+## Skills Demonstrated
 
-`AWS` · `Terraform` · `Infrastructure as Code` · `VPC design & subnetting` · `High availability (multi-AZ)` · `Load balancing & auto scaling` · `Cloud security (least privilege, IAM, IMDSv2)` · `Managed databases` · `Cost optimization` · `Git/GitHub workflow`
+Infrastructure as Code · AWS VPC design & subnetting · high availability (multi-AZ) ·
+load balancing & auto scaling · managed databases · cloud security (least privilege, IAM,
+IMDSv2, SSH-less access) · cost awareness · Git/GitHub workflow.
