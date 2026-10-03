@@ -157,7 +157,7 @@ project-01-aws-two-tier-terraform/
 
 ## Installation & configuration
 ```bash
-git clone https://github.com/deba310984/Project_1
+git clone https://github.com/deba310984/aws-two-tier-terraform
 cd Project_1/project-01-aws-two-tier-terraform/terraform
 
 # Optional: copy and edit non-secret variables
