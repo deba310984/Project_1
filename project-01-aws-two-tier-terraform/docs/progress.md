@@ -53,7 +53,7 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 
 ## Git
 - Commit status: committed across phases 0–7 on branch claude/keen-einstein-dn6tm7
-- GitHub publication: pushed; draft PR https://github.com/deba310984/Project_1/pull/1
+- GitHub publication: pushed; draft PR https://github.com/deba310984/aws-two-tier-terraform/pull/1
 
 ## Remaining for the owner
 1. `cd terraform && export TF_VAR_db_password=... && terraform init && terraform validate && terraform plan`
