@@ -1,0 +1,43 @@
+# ---- Terraform ----
+# Local .terraform directories (provider plugins, modules cache)
+**/.terraform/*
+
+# State files — NEVER commit (may contain secrets like RDS passwords in plaintext)
+*.tfstate
+*.tfstate.*
+
+# Crash log
+crash.log
+crash.*.log
+
+# Variable files that may contain secrets (commit *.tfvars.example instead)
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Plan output files (may contain sensitive values)
+*.tfplan
+plan.out
+
+# CLI config / override files
+.terraformrc
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ---- Credentials / secrets ----
+*.pem
+*.key
+.env
+.env.*
+credentials
+aws-credentials*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
