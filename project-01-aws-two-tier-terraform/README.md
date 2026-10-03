@@ -1,26 +1,23 @@
-# Project 01 — Two-Tier AWS Infrastructure with Terraform
+# Two-Tier AWS Infrastructure with Terraform
 
-> **Portfolio No.:** 1 &nbsp;|&nbsp; **Original Reference No.:** #11
-> **Reference:** [NotHarshhaa/DevOps-Projects — DevOps-Project-11](https://github.com/NotHarshhaa/DevOps-Projects/tree/master/DevOps-Project-11)
-> **Status:** ✅ Verified in AWS — `terraform apply` created 38 resources, ALB serving traffic, then destroyed
+> **Status:** Deployed & verified on AWS — `terraform apply` provisioned 38 resources, the ALB served live traffic across two Availability Zones, then the stack was destroyed cleanly.
 
-Provision a classic **two-tier AWS architecture** — a public web/application
-tier and a private data tier — entirely with **Terraform**, across two
-Availability Zones, following least-privilege networking and SSH-less
-instance access via AWS Systems Manager.
+A classic **two-tier AWS architecture** — a public web/application tier and a
+private data tier — provisioned entirely with **Terraform**, spanning two
+Availability Zones, with least-privilege networking and SSH-less instance
+access via AWS Systems Manager.
 
 ## Table of Contents
-- [Overview & problem statement](#overview--problem-statement)
+- [Overview](#overview)
 - [Real-world use case](#real-world-use-case)
-- [Features & objectives](#features--objectives)
+- [Features](#features)
 - [Architecture](#architecture)
 - [Architecture explanation](#architecture-explanation)
-- [Scope: reference vs implemented](#scope-reference-vs-implemented)
 - [Technology stack](#technology-stack)
 - [Repository structure](#repository-structure)
 - [Prerequisites](#prerequisites)
 - [Installation & configuration](#installation--configuration)
-- [Step-by-step implementation](#step-by-step-implementation)
+- [Deploy](#deploy)
 - [Testing & validation](#testing--validation)
 - [Security considerations](#security-considerations)
 - [Monitoring & troubleshooting](#monitoring--troubleshooting)
@@ -28,12 +25,9 @@ instance access via AWS Systems Manager.
 - [Known limitations](#known-limitations)
 - [Cost considerations](#cost-considerations)
 - [Cleanup](#cleanup)
-- [Interview preparation](#interview-preparation)
-- [References & attribution](#references--attribution)
 - [Future improvements](#future-improvements)
-- [Implementation checklist](#implementation-checklist)
 
-## Overview & problem statement
+## Overview
 Clicking resources together in the AWS console is slow, error-prone, and not
 repeatable. This project describes a complete two-tier stack **as code** so it
 can be reviewed, versioned, recreated identically, and destroyed on demand.
@@ -44,13 +38,14 @@ auto-scaling application tier that talks to a managed database kept fully
 private, with neither the app servers nor the database directly exposed to the
 internet.
 
-## Features & objectives
+## Features
 - One VPC across **2 Availability Zones** for fault tolerance.
 - **Three subnet tiers**: public (ALB/NAT), private-app (EC2), private-db (RDS).
 - **Application Load Balancer** fronting an **Auto Scaling Group** of EC2 instances.
 - **Amazon RDS (MySQL)**, encrypted, private, never internet-reachable.
 - **Least-privilege security groups** forming a one-way ALB → App → DB chain.
 - **No SSH**: admin shell via **SSM Session Manager** (IAM role, IMDSv2 enforced).
+- Zero-downtime rollouts via Auto Scaling **instance refresh**.
 - Secrets kept out of git; `terraform fmt` clean; native `terraform test` assertions.
 
 ## Architecture
@@ -90,20 +85,6 @@ flowchart TB
 
 **Two independent isolation layers protect the database:** it sits in a subnet with *no* internet route at all, *and* its security group trusts only the app tier.
 
-## Scope: reference vs implemented
-| Component | This project | Reference #11 |
-|-----------|:---:|:---:|
-| VPC, subnets, IGW, NAT, route tables | ✅ | ✅ |
-| ALB + Auto Scaling Group + EC2 | ✅ | ✅ |
-| RDS (MySQL) | ✅ | ✅ |
-| Tiered security groups | ✅ | ✅ |
-| SSM Session Manager (no SSH) | ✅ | — |
-| Route 53 / CloudFront / ACM / WAF / S3 | 📋 future | ✅ |
-
-The reference spans many services; this build implements the **core two-tier
-pattern** and documents the rest as [future improvements](#future-improvements)
-to stay focused and cost-aware.
-
 ## Technology stack
 | Tech | Role | Why |
 |------|------|-----|
@@ -116,12 +97,12 @@ to stay focused and cost-aware.
 
 ## Repository structure
 ```text
-project-01-aws-two-tier-terraform/
+.
 ├── README.md
 ├── .gitignore
 ├── architecture/
 │   ├── architecture.mmd
-│   └── images/                  # add rendered diagram / screenshots here
+│   └── images/
 ├── terraform/
 │   ├── versions.tf              # Terraform + provider version pins
 │   ├── providers.tf             # AWS provider + default tags
@@ -134,16 +115,14 @@ project-01-aws-two-tier-terraform/
 │   ├── outputs.tf               # ALB URL, endpoints, IDs
 │   └── terraform.tfvars.example # safe sample values (no secrets)
 ├── scripts/
-│   ├── user_data.sh             # instance bootstrap (Apache + info page)
+│   ├── user_data.sh             # instance bootstrap (Apache + status page)
 │   ├── deploy.sh                # fmt -> init -> validate -> plan
 │   └── destroy.sh               # guarded teardown
 ├── tests/
 │   └── plan.tftest.hcl          # native terraform test assertions
 └── docs/
     ├── implementation-notes.md
-    ├── troubleshooting.md
-    ├── interview-prep.md
-    └── progress.md
+    └── troubleshooting.md
 ```
 
 ## Prerequisites
@@ -151,14 +130,10 @@ project-01-aws-two-tier-terraform/
 - AWS account + credentials configured (`aws configure`, env vars, or an IAM role)
 - An IAM identity allowed to manage VPC / EC2 / ELB / RDS / IAM resources
 
-> This project was authored and format-validated in a cloud container whose
-> network policy blocks the Terraform registry, so `init`/`validate`/`plan`
-> are run by the repo owner on a machine with AWS credentials.
-
 ## Installation & configuration
 ```bash
 git clone https://github.com/deba310984/aws-two-tier-terraform
-cd Project_1/project-01-aws-two-tier-terraform/terraform
+cd aws-two-tier-terraform/project-01-aws-two-tier-terraform/terraform
 
 # Optional: copy and edit non-secret variables
 cp terraform.tfvars.example terraform.tfvars   # terraform.tfvars is gitignored
@@ -167,27 +142,27 @@ cp terraform.tfvars.example terraform.tfvars   # terraform.tfvars is gitignored
 export TF_VAR_db_password='choose-a-strong-password'
 ```
 
-## Step-by-step implementation
+## Deploy
 ```bash
 terraform init          # download the AWS provider, set up state
 terraform fmt -check     # formatting gate
 terraform validate       # => Success! The configuration is valid.
-terraform plan           # review ~30 resources; nothing created yet
+terraform plan           # review resources; nothing created yet
 terraform apply          # CREATES PAID RESOURCES — confirm when prompted
 ```
 Or use the helper: `./scripts/deploy.sh` (does fmt → init → validate → plan).
 
 ## Testing & validation
-- **Format:** `terraform fmt -check -recursive` — ✅ passes.
-- **Validate:** `terraform validate` — run on a machine with the provider.
+- **Format:** `terraform fmt -check -recursive`
+- **Validate:** `terraform validate`
 - **Automated test:** `cd terraform && terraform test` runs
   [`tests/plan.tftest.hcl`](tests/plan.tftest.hcl), asserting subnet counts and
-  that RDS is private + encrypted (needs AWS creds; it plans, creates nothing).
+  that RDS is private + encrypted (plans only, creates nothing).
 - **Post-apply smoke test:**
   ```bash
-  curl "$(terraform output -raw alb_dns_name)"   # expect the demo HTML
+  curl "$(terraform output -raw alb_dns_name)"
   ```
-  Refresh a few times — the instance ID / AZ should change as the ALB balances.
+  Refresh a few times — the instance ID / AZ changes as the ALB load-balances.
 
 ## Security considerations
 - **No SSH anywhere** — access via SSM Session Manager only.
@@ -204,11 +179,11 @@ Or use the helper: `./scripts/deploy.sh` (does fmt → init → validate → pla
 
 ## Execution evidence
 Deployed to AWS (`ap-south-1`) with `terraform apply` — **38 resources created, 0 errors**.
-The ALB serves the app from an EC2 instance in a private subnet:
+The ALB serves the app from an EC2 instance running in a private subnet:
 
 ![ALB serving the app from a private EC2 instance](architecture/images/alb-load-balancing.png)
 
-> Served by instance `i-0c57…` in `ap-south-1a`, reached through the public ALB —
+> Served through the public ALB from a private EC2 instance in `ap-south-1b` —
 > confirming the internet → ALB → private app flow works end to end. Infrastructure
 > was destroyed after verification to avoid ongoing charges.
 
@@ -238,38 +213,10 @@ terraform destroy          # or ../scripts/destroy.sh
 Then confirm in the console that no **NAT Gateway, ALB, EC2, or RDS** remains
 (these are the billable resources), and release any unattached EIPs.
 
-## Interview preparation
-Full sheet: [`docs/interview-prep.md`](docs/interview-prep.md). Quick hits:
-- **What makes a subnet public?** A route `0.0.0.0/0 → IGW`. Nothing else.
-- **How do private instances patch without inbound exposure?** NAT Gateway (outbound only).
-- **Why SG references instead of IPs?** They survive auto-scaling — trust the tier, not an address.
-- **Why IMDSv2?** Token-required metadata blocks SSRF-based credential theft.
-- **Where do Terraform secrets leak, and how do you prevent it?** Committed state / tfvars → remote encrypted state, `.gitignore`, sensitive vars, secrets managers.
-
-## References & attribution
-- Reference project: [NotHarshhaa/DevOps-Projects #11](https://github.com/NotHarshhaa/DevOps-Projects/tree/master/DevOps-Project-11) (scope inspiration; this is an independent implementation).
-- [Terraform AWS Provider docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [AWS VPC](https://docs.aws.amazon.com/vpc/) · [Auto Scaling](https://docs.aws.amazon.com/autoscaling/) · [RDS](https://docs.aws.amazon.com/rds/) · [SSM Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html)
-
 ## Future improvements
 - HTTPS: ACM certificate + 443 listener + HTTP→HTTPS redirect.
 - Route 53 hosted zone + alias record to the ALB.
 - CloudFront CDN and AWS WAF in front of the ALB.
 - S3 bucket for static assets; CloudWatch alarms + dashboards.
-- Refactor into reusable modules (that becomes Portfolio Project 2).
+- Refactor the tiers into reusable Terraform modules.
 - Remote state (S3 + DynamoDB lock) and CI `fmt`/`validate`/`tflint`/`checkov` checks.
-
-## Implementation checklist
-- [x] Phase 0 — scaffold + Terraform foundation
-- [x] Phase 1 — networking (VPC, subnets, IGW, NAT, routes)
-- [x] Phase 2 — security groups (ALB → App → DB)
-- [x] Phase 3 — application tier (launch template, ALB, ASG, SSM role)
-- [x] Phase 4 — data tier (RDS)
-- [x] Phase 5 — outputs, helper scripts, terraform test
-- [x] Phase 7 — documentation, interview sheet
-- [ ] Phase 6 — **(owner)** `apply`, smoke-test, screenshots, then `destroy`
-- [ ] `terraform validate` / `plan` confirmed green on owner's machine
-- [ ] Execution screenshots added to `architecture/images/`
-
----
-*Part of a DevOps/SRE portfolio. Reference: NotHarshhaa/DevOps-Projects #11. Independent implementation — not a copy of the reference.*

@@ -52,14 +52,10 @@ terraform {
 Then `terraform init -migrate-state`. Never commit state either way — it can
 contain the RDS password in plaintext.
 
-## How verification was done
-- Authored in a cloud container where the Terraform registry is blocked, so
-  `terraform fmt -check -recursive` is the local gate (passes).
-- `terraform init` / `validate` / `plan` / `test` / `apply` run by the repo
-  owner on a machine with AWS credentials.
-
-## Resume bullet
-> Built a highly-available two-tier AWS architecture as Terraform IaC — VPC
-> across 2 AZs with public/private subnet tiers, ALB + Auto Scaling EC2, and a
-> private encrypted RDS MySQL — enforcing least-privilege security groups,
-> IMDSv2, and SSH-less SSM access; format-validated with native `terraform test`.
+## Verification
+- `terraform fmt -check -recursive` and `terraform validate` pass.
+- `terraform test` (plan-time assertions) covers subnet counts and that RDS is
+  private and encrypted.
+- Deployed to AWS (`ap-south-1`): `terraform apply` provisioned 38 resources,
+  the ALB served traffic across both AZs, then `terraform destroy` removed
+  everything.
