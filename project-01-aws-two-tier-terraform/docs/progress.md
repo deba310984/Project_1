@@ -22,7 +22,7 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 | 1 | Networking (VPC, subnets, IGW, NAT, routes) | Implemented — Not Yet Verified |
 | 2 | Security groups (ALB → App → DB) | Implemented — Not Yet Verified |
 | 3 | Application tier (launch template, ASG, ALB, SSM role) | Implemented — Not Yet Verified |
-| 4 | Data tier (RDS + subnet group) | Planned |
+| 4 | Data tier (RDS + subnet group) | Implemented — Not Yet Verified |
 | 5 | Outputs, fmt, validate, plan | Planned |
 | 6 | (User/AWS) apply, test, screenshot, destroy | Planned |
 | 7 | Docs polish, interview sheet, commit & PR | Planned |
