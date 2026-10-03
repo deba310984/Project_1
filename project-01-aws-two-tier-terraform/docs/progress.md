@@ -3,7 +3,7 @@
 - **Portfolio No.:** 1
 - **Original Reference No.:** #11
 - **Reference:** https://github.com/NotHarshhaa/DevOps-Projects/tree/master/DevOps-Project-11
-- **Overall status:** In Progress
+- **Overall status:** Code complete & format-validated; AWS apply/test pending (owner)
 
 ## Status legend
 Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verified Locally · Verified in AWS · Published to GitHub · Completed
@@ -11,42 +11,53 @@ Planned · In Progress · Blocked · Implemented — Not Yet Verified · Verifie
 ## Prerequisites
 | Item | Status | Notes |
 |------|--------|-------|
-| Terraform CLI (local) | Not installed in cloud container | User installs locally, or we install in ephemeral container for fmt/validate |
-| AWS CLI + credentials | Not present in cloud container | User provides on their own machine for plan/apply |
-| AWS account (free-tier) | User-owned | Needed for Phase 6 apply |
+| Terraform CLI | Installed in container (v1.9.8) for fmt only | Owner installs locally for init/validate/plan/apply |
+| AWS CLI + credentials | Not present in cloud container | Owner provides on their own machine |
+| AWS account (free-tier) | Owner-owned | Needed for Phase 6 apply |
 
 ## Phases
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 0 | Scaffold & Terraform foundation (versions, providers, vars, .gitignore, docs, diagram) | Verified Locally (fmt) |
-| 1 | Networking (VPC, subnets, IGW, NAT, routes) | Implemented — Not Yet Verified |
-| 2 | Security groups (ALB → App → DB) | Implemented — Not Yet Verified |
-| 3 | Application tier (launch template, ASG, ALB, SSM role) | Implemented — Not Yet Verified |
-| 4 | Data tier (RDS + subnet group) | Implemented — Not Yet Verified |
-| 5 | Outputs, fmt, validate, plan | Implemented — Not Yet Verified |
-| 6 | (User/AWS) apply, test, screenshot, destroy | Planned |
-| 7 | Docs polish, interview sheet, commit & PR | Planned |
+| 0 | Scaffold & Terraform foundation | Verified Locally (fmt) · Published to GitHub |
+| 1 | Networking (VPC, subnets, IGW, NAT, routes) | Implemented — Not Yet Verified · Published |
+| 2 | Security groups (ALB → App → DB) | Implemented — Not Yet Verified · Published |
+| 3 | Application tier (launch template, ASG, ALB, SSM role) | Implemented — Not Yet Verified · Published |
+| 4 | Data tier (RDS + subnet group) | Implemented — Not Yet Verified · Published |
+| 5 | Outputs, helper scripts, terraform test | Implemented — Not Yet Verified · Published |
+| 6 | (Owner/AWS) apply, test, screenshot, destroy | Planned (owner action) |
+| 7 | Docs polish, interview sheet | Verified Locally · Published |
 
 ## Test results
-- `terraform fmt -check`: PASS (run in cloud container, 2026-10-03)
-- `terraform validate`: BLOCKED in container (egress proxy blocks registry.terraform.io; provider cannot download). Run on user's machine.
-- `terraform plan`: not yet run (user's machine, needs AWS creds)
+- `terraform fmt -check -recursive`: PASS (cloud container, 2026-10-03)
+- `terraform validate`: BLOCKED in container (egress proxy blocks registry.terraform.io). Run on owner's machine.
+- `terraform plan`: not yet run (owner's machine, needs AWS creds)
+- `terraform test` (tests/plan.tftest.hcl): authored; run by owner (needs AWS creds)
 
 ## Security checks
-- No secrets/state committed: enforced via `.gitignore` (verify before each commit)
-- SSM instead of public SSH: planned (Phase 3)
+- No secrets/state committed: enforced via `.gitignore`; verified `terraform.tfvars` ignored, `.example` committed
+- db_password: sensitive variable, no default, supplied via TF_VAR_db_password
+- SSM instead of public SSH: implemented (iam.tf + instance profile)
+- IMDSv2 enforced on launch template; RDS encrypted + not publicly accessible
 
 ## Documentation & diagrams
-- README.md: scaffolded
-- architecture/architecture.mmd: created (not yet rendered to image)
-- Screenshots: none yet (produced during Phase 6)
+- README.md: full portfolio README (all sections)
+- docs/implementation-notes.md, troubleshooting.md, interview-prep.md: written
+- architecture/architecture.mmd: created (render to architecture/images/ when ready)
+- Screenshots: none yet (produced during Phase 6 by owner; do not include secrets)
 
 ## Active cloud resources
 - None (nothing applied)
 
 ## Cleanup status
-- N/A (nothing deployed)
+- N/A (nothing deployed). Teardown documented: scripts/destroy.sh / `terraform destroy`.
 
 ## Git
-- Commit status: not yet committed
-- GitHub publication: not yet published
+- Commit status: committed across phases 0–7 on branch claude/keen-einstein-dn6tm7
+- GitHub publication: pushed; draft PR https://github.com/deba310984/Project_1/pull/1
+
+## Remaining for the owner
+1. `cd terraform && export TF_VAR_db_password=... && terraform init && terraform validate && terraform plan`
+2. Review plan; `terraform apply` (creates PAID resources).
+3. `curl $(terraform output -raw alb_dns_name)` to smoke-test; screenshot to architecture/images/.
+4. `terraform destroy` (or scripts/destroy.sh) and verify no billable resources remain.
+5. Update this file's statuses to Verified in AWS once confirmed.
