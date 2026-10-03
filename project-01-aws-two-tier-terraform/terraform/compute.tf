@@ -105,6 +105,16 @@ resource "aws_autoscaling_group" "app" {
     version = "$Latest"
   }
 
+  # Roll instances automatically when the launch template changes (e.g. the
+  # page/user_data is updated), keeping the fleet above 50% capacity during
+  # the rollout. This is how you ship a new app version with zero downtime.
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
+  }
+
   tag {
     key                 = "Name"
     value               = "${local.name_prefix}-app"
