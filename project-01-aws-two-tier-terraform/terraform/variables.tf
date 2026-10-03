@@ -76,3 +76,19 @@ variable "single_nat_gateway" {
   type        = bool
   default     = true
 }
+
+# ---------------------------------------------------------------------------
+# Application / database ports (Phase 2)
+# ---------------------------------------------------------------------------
+
+variable "app_port" {
+  description = "TCP port the app listens on (ALB forwards here)."
+  type        = number
+  default     = 80
+}
+
+variable "db_port" {
+  description = "TCP port for the database (3306 = MySQL, 5432 = PostgreSQL)."
+  type        = number
+  default     = 3306
+}
