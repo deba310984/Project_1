@@ -10,6 +10,14 @@
 [![Amazon RDS](https://img.shields.io/badge/RDS-527FFF?style=flat-square&logo=amazonrds&logoColor=white)](https://aws.amazon.com/rds/)
 [![Status](https://img.shields.io/badge/status-deployed_%26_verified-2ea44f?style=flat-square)](#results--evidence)
 
+<br/>
+
+### 🎬 24-second explainer
+
+[![Watch the explainer video](media/poster.jpg)](media/explainer.mp4)
+
+*Click the image to play the video.*
+
 </div>
 
 ---
